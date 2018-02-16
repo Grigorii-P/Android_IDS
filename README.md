@@ -1,0 +1,1 @@
+To start the flask-server, activate the 'start' script
