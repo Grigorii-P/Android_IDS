@@ -17,8 +17,12 @@ def create_task():
 #        abort(400)
 
     data = request.get_data()
-    data = int(data)
-    return str(data*data)
+    try:
+        data = int(data)
+        return str(data*data)
+    except ValueError:
+        return 'Not a number'
+
 
 
 if __name__ == '__main__':
