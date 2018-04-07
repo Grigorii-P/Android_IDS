@@ -138,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
         usr = et1.getText().toString();
         et2 = (EditText)findViewById(R.id.editText);
         psw = et2.getText().toString();
+
+        new POST().execute(IP + "/login");
     }
 
 
@@ -164,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
                 os.close();
 
                 urlConnection.connect();
-                int responseCode = urlConnection.getResponseCode();
 
                 inputStream = new BufferedInputStream(urlConnection.getInputStream());
                 Scanner s = new Scanner(inputStream).useDelimiter("\\A");
@@ -173,15 +174,6 @@ public class MainActivity extends AppCompatActivity {
                 else textView.setText("Bad request");
                 inputStream.close();
 
-
-
-//                if (responseCode == 200) {
-//                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
-//                    Scanner s = new Scanner(inputStream).useDelimiter("\\A");
-//                    response = s.hasNext() ? s.next() : "NO RESPONSE";
-//                    if (response.equals("yeah")) textView.setText("Sup from Server!");
-//                } else {
-//                }
             } catch (IOException e) {
             }
             return response;
