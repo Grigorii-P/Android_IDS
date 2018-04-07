@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import hashlib
 
 app = Flask(__name__)
 
@@ -6,22 +7,27 @@ app = Flask(__name__)
 #def get_tasks():
 #    return jsonify({'tasks': tasks})
 
-@app.route('/hello', methods=['GET'])
-def get_tasks():
-    return 'Hello from Flask!'
+secret = 12378987123
+N = '{0:01024b}'.format(secret)
+database = {}
 
 
-@app.route('/sqrt', methods=['POST'])
-def create_task():
-#    if not request.json or not 'title' in request.json:
-#        abort(400)
+def add_to_database(data):
+    usr = data[0] + N
+    psw = hashlib.sha256(bytes(data[0] + N + data[1], encoding='utf-8')).hexdigest()
+    database[usr] = psw
 
-    data = request.get_data()
+
+@app.route('/put_data', methods=['POST'])
+def add_user():
     try:
-        data = int(data)
-        return str(data*data)
-    except ValueError:
-        return 'Not a number'
+        data = str(request.values)
+        data = data.split('_')
+        add_to_database(data)
+        print('size of database is ', len(database))
+        return 'good request'
+    except:
+        return 'bad request'
 
 
 

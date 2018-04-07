@@ -33,10 +33,16 @@ import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+    private static final String IP = "http://10.91.50.3:5000";
     List<String> weakPasswords = new ArrayList<>();
     List<String> usernames = new ArrayList<>();
-    List<String> passwords = new ArrayList<>();
+    String usr = null;
+    String psw = null;
+    EditText et1 = null;
+    EditText et2 = null;
     TextView textView = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             is.read(buffer);
             is.close();
             String[] array = (new String(buffer)).split("\n");
-            List<String> weakPasswords = Arrays.asList(array);
+            weakPasswords = Arrays.asList(array);
         }
         catch (IOException e) {
             System.out.print(e);
@@ -93,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
         int len = s.length();
         List<String> similarPasw = new ArrayList<>();
 
-        for (int i = 0; i < passwords.size(); i++) {
-            String temp = passwords.get(i);
+        for (int i = 0; i < weakPasswords.size(); i++) {
+            String temp = weakPasswords.get(i);
             if (temp.length() == len) similarPasw.add(temp);
         }
 
@@ -113,24 +119,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void signUp(View view) {
-        EditText et1 = (EditText)findViewById(R.id.editText2);
-        String usr = et1.getText().toString();
-        EditText et2 = (EditText)findViewById(R.id.editText);
-        String psw = et2.getText().toString();
-
-
+        et1 = (EditText)findViewById(R.id.editText2);
+        usr = et1.getText().toString();
+        et2 = (EditText)findViewById(R.id.editText);
+        psw = et2.getText().toString();
 
         if (usernames.contains(usr)) textView.setText("The username already exists");
         else if (isPswWeak(psw) || psw.length() == 0) textView.setText("The password is too weak");
         else {
             usernames.add(usr);
-            textView.setText("Congrats!");
+            new POST().execute(IP + "/signup");
         }
     }
 
 
     public void logIn(View view) {
-//        Intent intent = new Intent(this, LoginActivity.class);
-//        startActivity(intent);
+        et1 = (EditText)findViewById(R.id.editText2);
+        usr = et1.getText().toString();
+        et2 = (EditText)findViewById(R.id.editText);
+        psw = et2.getText().toString();
+    }
+
+
+    public class POST extends AsyncTask<String, Void, String> {
+        protected String doInBackground(String... urls) /*throws IOException MalformedURLException*/ {
+
+            URL url;
+            String response = null;
+            HttpURLConnection urlConnection;
+            InputStream inputStream;
+            byte[] data;
+
+            try {
+                url = new URL(urls[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+
+                urlConnection.setRequestProperty("Content-Length", "" + Integer.toString((usr+"_"+psw).getBytes().length));
+                OutputStream os = urlConnection.getOutputStream();
+                data = (usr+"_"+psw).getBytes("UTF-8");
+                os.write(data);
+                os.close();
+
+                urlConnection.connect();
+                int responseCode = urlConnection.getResponseCode();
+
+                inputStream = new BufferedInputStream(urlConnection.getInputStream());
+                Scanner s = new Scanner(inputStream).useDelimiter("\\A");
+                response = s.next();
+                if (response.equals("good request")) textView.setText("Congrats!");
+                else textView.setText("Bad request");
+                inputStream.close();
+
+
+
+//                if (responseCode == 200) {
+//                    inputStream = new BufferedInputStream(urlConnection.getInputStream());
+//                    Scanner s = new Scanner(inputStream).useDelimiter("\\A");
+//                    response = s.hasNext() ? s.next() : "NO RESPONSE";
+//                    if (response.equals("yeah")) textView.setText("Sup from Server!");
+//                } else {
+//                }
+            } catch (IOException e) {
+            }
+            return response;
+        }
     }
 }
