@@ -36,12 +36,13 @@ public class MainActivity extends AppCompatActivity {
     List<String> weakPasswords = new ArrayList<>();
     List<String> usernames = new ArrayList<>();
     List<String> passwords = new ArrayList<>();
-    TextView textView = (TextView) findViewById(R.id.textView2);
+    TextView textView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        textView = (TextView) findViewById(R.id.textView2);
 
         try {
             InputStream is = getAssets().open("weaks.txt");
@@ -120,8 +121,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (usernames.contains(usr)) textView.setText("The username already exists");
-        else if (isPswWeak(psw)) textView.setText("The password is too weak");
+        else if (isPswWeak(psw) || psw.length() == 0) textView.setText("The password is too weak");
         else {
+            usernames.add(usr);
             textView.setText("Congrats!");
         }
     }
